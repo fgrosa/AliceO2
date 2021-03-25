@@ -72,6 +72,8 @@ struct SelectTracks {
      {"hpt_cuts_3prong", "tracks selected for 3-prong vertexing;#it{p}_{T}^{track} (GeV/#it{c});entries", {HistType::kTH1F, {{100, 0., 10.}}}},
      {"hdcatoprimxy_cuts_3prong", "tracks selected for 3-prong vertexing;DCAxy to prim. vtx. (cm);entries", {HistType::kTH1F, {{400, -2., 2.}}}},
      {"heta_cuts_3prong", "tracks selected for 3-prong vertexing;#it{#eta};entries", {HistType::kTH1F, {{static_cast<int>(1.2 * etamax_3prong * 100), -1.2 * etamax_3prong, 1.2 * etamax_3prong}}}}}};
+     {"h_cpu_time_track", "CPU time per event elapsed for track selection;CPU time / event (s);entries", {HistType::kTH1F, {{1000, 0., 1000.}}}},
+     {"h_wall_time_track", "Wall time per event elapsed for track selection;Wall time / event (s);entries", {HistType::kTH1F, {{1000, 0., 1000.}}}}}};
 
   // array of 2-prong and 3-prong single-track cuts
   std::array<LabeledArray<double>, 2> cutsSingleTrack;
@@ -105,6 +107,9 @@ struct SelectTracks {
   void process(aod::Collision const& collision,
                soa::Join<aod::Tracks, aod::TracksCov, aod::TracksExtra> const& tracks)
   {
+    auto clockStart = std::clock();
+    auto startTime = std::chrono::high_resolution_clock::now();
+
     math_utils::Point3D<float> vtxXYZ(collision.posX(), collision.posY(), collision.posZ());
     for (auto& track : tracks) {
 
@@ -174,6 +179,11 @@ struct SelectTracks {
       // fill table row
       rowSelectedTrack(status_prong, dca[0], dca[1]);
     }
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto clockEnd = std::clock();
+    std::chrono::duration<double> wallTime = std::chrono::duration_cast<std::chrono::duration<double>>(endTime - startTime);
+    registry.get<TH1>(HIST("h_cpu_time_track"))->Fill(double(clockEnd-clockStart) / CLOCKS_PER_SEC);
+    registry.get<TH1>(HIST("h_wall_time_track"))->Fill(wallTime.count());
   }
 };
 
@@ -220,7 +230,9 @@ struct HFTrackIndexSkimsCreator {
      {"hmassDPlusToPiKPi", "D+ candidates;inv. mass (#pi K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}},
      {"hmassLcToPKPi", "Lc candidates;inv. mass (p K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}},
      {"hmassDsToPiKK", "Ds candidates;inv. mass (K K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}},
-     {"hmassXicToPKPi", "Xic candidates;inv. mass (p K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}}}};
+     {"hmassXicToPKPi", "Xic candidates;inv. mass (p K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}},
+     {"h_cpu_time_cand", "CPU time per event elapsed for candidate selection;CPU time / event (s);entries", {HistType::kTH1F, {{1000, 0., 1000.}}}},
+     {"h_wall_time_cand", "Wall time per event elapsed for candidate selection;Wall time / event (s);entries", {HistType::kTH1F, {{1000, 0., 1000.}}}}}};
 
   Filter filterSelectTracks = (aod::hf_seltrack::isSelProng > 0);
   using SelectedTracks = soa::Filtered<soa::Join<aod::Tracks, aod::TracksCov, aod::TracksExtra, aod::HFSelTrack>>;
@@ -263,6 +275,9 @@ struct HFTrackIndexSkimsCreator {
         return;
       }
     }
+
+    auto clockStart = std::clock();
+    auto startTime = std::chrono::high_resolution_clock::now();
 
     //FIXME move above process function
     const int n2ProngDecays = N2ProngDecays;             //number of two prong hadron types
@@ -905,6 +920,12 @@ struct HFTrackIndexSkimsCreator {
     registry.get<TH1>(HIST("hNCand3Prong"))->Fill(nCand3);
     registry.get<TH2>(HIST("hNCand2ProngVsNTracks"))->Fill(nTracks, nCand2);
     registry.get<TH2>(HIST("hNCand3ProngVsNTracks"))->Fill(nTracks, nCand3);
+
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto clockEnd = std::clock();
+    std::chrono::duration<double> wallTime = std::chrono::duration_cast<std::chrono::duration<double>>(endTime - startTime);
+    registry.get<TH1>(HIST("h_cpu_time_cand"))->Fill(double(clockEnd-clockStart) / CLOCKS_PER_SEC);
+    registry.get<TH1>(HIST("h_wall_time_cand"))->Fill(wallTime.count());
   }
 };
 
