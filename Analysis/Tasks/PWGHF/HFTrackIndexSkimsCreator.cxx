@@ -72,8 +72,8 @@ struct SelectTracks {
      {"hpt_cuts_3prong", "tracks selected for 3-prong vertexing;#it{p}_{T}^{track} (GeV/#it{c});entries", {HistType::kTH1F, {{100, 0., 10.}}}},
      {"hdcatoprimxy_cuts_3prong", "tracks selected for 3-prong vertexing;DCAxy to prim. vtx. (cm);entries", {HistType::kTH1F, {{400, -2., 2.}}}},
      {"heta_cuts_3prong", "tracks selected for 3-prong vertexing;#it{#eta};entries", {HistType::kTH1F, {{static_cast<int>(1.2 * etamax_3prong * 100), -1.2 * etamax_3prong, 1.2 * etamax_3prong}}}}}};
-     {"h_cpu_time_track", "CPU time per event elapsed for track selection;CPU time / event (s);entries", {HistType::kTH1F, {{1000, 0., 1000.}}}},
-     {"h_wall_time_track", "Wall time per event elapsed for track selection;Wall time / event (s);entries", {HistType::kTH1F, {{1000, 0., 1000.}}}}}};
+     {"h_cpu_time_track_vs_NTracks", "CPU time per event elapsed for track selection;# of selected tracks;CPU time / event (s);entries", {HistType::kTH2F, {{2500, 0., 25000.}, {5000, 0., 1.}}}},
+     {"h_wall_time_track_vs_NTracks", "Wall time per event elapsed for track selection;# of selected tracks;Wall time / event (s);entries", {HistType::kTH2F, {{2500, 0., 25000.}, {5000, 0., 1.}}}}}};
 
   // array of 2-prong and 3-prong single-track cuts
   std::array<LabeledArray<double>, 2> cutsSingleTrack;
@@ -104,6 +104,7 @@ struct SelectTracks {
     return true;
   }
 
+  int nTracksSel = 0; // number of tracks passing 2 or 3 prong selection in this collision
   void process(aod::Collision const& collision,
                soa::Join<aod::Tracks, aod::TracksCov, aod::TracksExtra> const& tracks)
   {
@@ -162,6 +163,10 @@ struct SelectTracks {
         }
       }
 
+      if ((status_prong & (1 << 0)) || (status_prong & (1 << 1))) {
+        nTracksSel++;
+      }
+
       // fill histograms
       if (b_dovalplots) {
         if (status_prong & (1 << 0)) {
@@ -179,11 +184,13 @@ struct SelectTracks {
       // fill table row
       rowSelectedTrack(status_prong, dca[0], dca[1]);
     }
+
+    // stop CPU and wall time counters and fill histograms
     auto endTime = std::chrono::high_resolution_clock::now();
     auto clockEnd = std::clock();
     std::chrono::duration<double> wallTime = std::chrono::duration_cast<std::chrono::duration<double>>(endTime - startTime);
-    registry.get<TH1>(HIST("h_cpu_time_track"))->Fill(double(clockEnd-clockStart) / CLOCKS_PER_SEC);
-    registry.get<TH1>(HIST("h_wall_time_track"))->Fill(wallTime.count());
+    registry.get<TH2>(HIST("h_cpu_time_track_vs_NTracks"))->Fill(nTracksSel, double(clockEnd-clockStart) / CLOCKS_PER_SEC);
+    registry.get<TH2>(HIST("h_wall_time_track_vs_NTracks"))->Fill(nTracksSel, wallTime.count());
   }
 };
 
@@ -231,8 +238,8 @@ struct HFTrackIndexSkimsCreator {
      {"hmassLcToPKPi", "Lc candidates;inv. mass (p K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}},
      {"hmassDsToPiKK", "Ds candidates;inv. mass (K K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}},
      {"hmassXicToPKPi", "Xic candidates;inv. mass (p K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}},
-     {"h_cpu_time_cand", "CPU time per event elapsed for candidate selection;CPU time / event (s);entries", {HistType::kTH1F, {{1000, 0., 1000.}}}},
-     {"h_wall_time_cand", "Wall time per event elapsed for candidate selection;Wall time / event (s);entries", {HistType::kTH1F, {{1000, 0., 1000.}}}}}};
+     {"hCPUTimeCandVsNTracks", "CPU time per event elapsed for candidate selection;# of selected tracks;CPU time / event (s);entries", {HistType::kTH2F, {{2500, 0., 25000.}, {5000, 0., 100.}}}},
+     {"hWallTimeCandVsNTracks", "Wall time per event elapsed for candidate selection;# of selected tracks;Wall time / event (s);entries", {HistType::kTH2F, {{2500, 0., 25000.}, {5000, 0., 100.}}}}}};
 
   Filter filterSelectTracks = (aod::hf_seltrack::isSelProng > 0);
   using SelectedTracks = soa::Filtered<soa::Join<aod::Tracks, aod::TracksCov, aod::TracksExtra, aod::HFSelTrack>>;
@@ -921,11 +928,12 @@ struct HFTrackIndexSkimsCreator {
     registry.get<TH2>(HIST("hNCand2ProngVsNTracks"))->Fill(nTracks, nCand2);
     registry.get<TH2>(HIST("hNCand3ProngVsNTracks"))->Fill(nTracks, nCand3);
 
+    // stop CPU and wall time counters and fill histograms
     auto endTime = std::chrono::high_resolution_clock::now();
     auto clockEnd = std::clock();
     std::chrono::duration<double> wallTime = std::chrono::duration_cast<std::chrono::duration<double>>(endTime - startTime);
-    registry.get<TH1>(HIST("h_cpu_time_cand"))->Fill(double(clockEnd-clockStart) / CLOCKS_PER_SEC);
-    registry.get<TH1>(HIST("h_wall_time_cand"))->Fill(wallTime.count());
+    registry.get<TH2>(HIST("hCPUTimeCandVsNTracks"))->Fill(nTracks, double(clockEnd-clockStart) / CLOCKS_PER_SEC);
+    registry.get<TH2>(HIST("hWallTimeCandVsNTracks"))->Fill(nTracks, wallTime.count());
   }
 };
 
