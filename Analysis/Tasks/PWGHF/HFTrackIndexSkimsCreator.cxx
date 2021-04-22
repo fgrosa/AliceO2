@@ -19,6 +19,7 @@
 #include "Framework/AnalysisTask.h"
 #include "Framework/HistogramRegistry.h"
 #include "DetectorsVertexing/DCAFitterN.h"
+#include "AnalysisDataModel/EventSelection.h"
 #include "AnalysisDataModel/HFSecondaryVertex.h"
 #include "AnalysisCore/trackUtilities.h"
 #include "AnalysisCore/HFConfigurables.h"
