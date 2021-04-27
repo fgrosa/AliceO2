@@ -33,7 +33,7 @@ using namespace o2::aod;
 using namespace o2::analysis;
 using namespace o2::analysis::hf_cuts_single_track;
 
-/// Event selection 
+/// Event selection
 struct SelectCollisions {
 
   Produces<aod::HFSelCollision> rowSelectedCollision;
@@ -65,8 +65,8 @@ struct SelectCollisions {
     //TODO: add more event selection criteria
 
     // selected events
-    if(b_dovalplots) {
-        registry.get<TH1>(HIST("h_events"))->Fill(1);
+    if (b_dovalplots) {
+      registry.get<TH1>(HIST("h_events"))->Fill(1);
     }
 
     // fill table row
@@ -259,7 +259,6 @@ struct HFTrackIndexSkimsCreator {
      {"hmassLcToPKPi", "#Lambda_{c} candidates;inv. mass (p K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}},
      {"hmassDsToPiKK", "D_{s} candidates;inv. mass (K K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}},
      {"hmassXicToPKPi", "#Xi_{c} candidates;inv. mass (p K #pi) (GeV/#it{c}^{2});entries", {HistType::kTH1F, {{500, 0., 5.}}}}}};
-
 
   Filter filterSelectCollisions = (aod::hf_selcollision::whyRejectColl == 0);
   Filter filterSelectTracks = (aod::hf_seltrack::isSelProng > 0);
