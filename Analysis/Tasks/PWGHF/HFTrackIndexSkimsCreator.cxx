@@ -49,8 +49,8 @@ struct HfProduceSelCollisions {
   void init(InitContext const&)
   {
     std::string labels[3] = {"processed collisions", "selected collisions", "rej. trigger class"};
-    for(int iBin=0; iBin<3; iBin++) {
-      registry.get<TH1>(HIST("h_events"))->GetXaxis()->SetBinLabel(iBin+1, labels[iBin].data());
+    for (int iBin = 0; iBin < 3; iBin++) {
+      registry.get<TH1>(HIST("h_events"))->GetXaxis()->SetBinLabel(iBin + 1, labels[iBin].data());
     }
   }
 
