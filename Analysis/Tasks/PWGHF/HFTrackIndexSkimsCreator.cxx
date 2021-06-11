@@ -482,7 +482,7 @@ struct HFTrackIndexSkimsCreator {
 
       // pT
       auto pTBin = findBin(pTBins2Prong[n2], pT); // 20 MeV tolerance because of no reco decay vertex
-      if (pTBin == -1) {                                                                                               // return immediately if it is outside the defined pT bins
+      if (pTBin == -1) {                          // return immediately if it is outside the defined pT bins
         isSelected &= ~(1 << n2);
         if (debug.value) {
           cutStatus[n2][0] = false;
@@ -543,7 +543,7 @@ struct HFTrackIndexSkimsCreator {
 
       // pT
       auto pTBin = findBin(pTBins3Prong[n3], pT); // 20 MeV tolerance because of no reco decay vertex
-      if (pTBin == -1) {                                                                                               // cut if it is outside the defined pT bins
+      if (pTBin == -1) {                          // cut if it is outside the defined pT bins
         isSelected &= ~(1 << n3);
         if (debug.value) {
           cutStatus[n3][0] = false;
