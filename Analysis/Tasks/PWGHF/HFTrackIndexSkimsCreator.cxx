@@ -273,7 +273,7 @@ struct HfTagSelTracks {
         statusProng &= ~BIT(Cand2Prong); // the bitwise operation &= ~BIT(n) will set the nth bit to 0
         if (debug.value) {
           cutStatus[Cand2Prong][0] = false;
-          if (doValPlots.value) {
+          if (fillHistograms.value) {
             registry.get<TH1>(HIST("hRejTracks"))->Fill(2);
           }
         }
@@ -282,7 +282,7 @@ struct HfTagSelTracks {
         statusProng &= ~BIT(Cand3Prong);
         if (debug.value) {
           cutStatus[Cand3Prong][0] = false;
-          if (doValPlots.value) {
+          if (fillHistograms.value) {
             registry.get<TH1>(HIST("hRejTracks"))->Fill(7);
           }
         }
@@ -293,7 +293,7 @@ struct HfTagSelTracks {
         statusProng &= ~BIT(CandV0bachelor);
         if (debug.value) {
           cutStatus[CandV0bachelor][0] = false;
-          if (doValPlots.value) {
+          if (fillHistograms.value) {
             registry.get<TH1>(HIST("hRejTracks"))->Fill(12);
           }
         }
@@ -304,7 +304,7 @@ struct HfTagSelTracks {
         statusProng &= ~BIT(Cand2Prong);
         if (debug.value) {
           cutStatus[Cand2Prong][1] = false;
-          if (doValPlots.value) {
+          if (fillHistograms.value) {
             registry.get<TH1>(HIST("hRejTracks"))->Fill(3);
           }
         }
@@ -313,7 +313,7 @@ struct HfTagSelTracks {
         statusProng &= ~BIT(Cand3Prong);
         if (debug.value) {
           cutStatus[Cand3Prong][1] = false;
-          if (doValPlots.value) {
+          if (fillHistograms.value) {
             registry.get<TH1>(HIST("hRejTracks"))->Fill(8);
           }
         }
@@ -324,7 +324,7 @@ struct HfTagSelTracks {
         statusProng &= ~BIT(CandV0bachelor);
         if (debug.value) {
           cutStatus[CandV0bachelor][1] = false;
-          if (doValPlots.value) {
+          if (fillHistograms.value) {
             registry.get<TH1>(HIST("hRejTracks"))->Fill(13);
           }
         }
@@ -343,7 +343,7 @@ struct HfTagSelTracks {
           if (debug.value) {
             for (int iCandType = 0; iCandType <= CandV0bachelor; iCandType++) {
               cutStatus[iCandType][2] = false;
-              if (doValPlots.value) {
+              if (fillHistograms.value) {
                 registry.get<TH1>(HIST("hRejTracks"))->Fill(iCandType * 5 + 4);
               }
             }
@@ -362,7 +362,7 @@ struct HfTagSelTracks {
           statusProng &= ~BIT(Cand2Prong);
           if (debug.value) {
             cutStatus[Cand2Prong][3] = false;
-            if (doValPlots.value) {
+            if (fillHistograms.value) {
               registry.get<TH1>(HIST("hRejTracks"))->Fill(5);
             }
           }
@@ -371,7 +371,7 @@ struct HfTagSelTracks {
           statusProng &= ~BIT(Cand3Prong);
           if (debug.value) {
             cutStatus[Cand3Prong][3] = false;
-            if (doValPlots.value) {
+            if (fillHistograms.value) {
               registry.get<TH1>(HIST("hRejTracks"))->Fill(10);
             }
           }
@@ -380,7 +380,7 @@ struct HfTagSelTracks {
           statusProng &= ~BIT(CandV0bachelor);
           if (debug.value) {
             cutStatus[CandV0bachelor][3] = false;
-            if (doValPlots.value) {
+            if (fillHistograms.value) {
               registry.get<TH1>(HIST("hRejTracks"))->Fill(15);
             }
           }
