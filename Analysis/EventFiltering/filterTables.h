@@ -25,13 +25,18 @@ DECLARE_SOA_COLUMN(He4, hasHe4, bool); //!
 // diffraction
 DECLARE_SOA_COLUMN(DG, hasDG, bool); //! Double Gap events, DG
 
+// heavy flavours
+DECLARE_SOA_COLUMN(HfHighPt, hasHfHighPt, bool); //! high-pT charm hadron
+DECLARE_SOA_COLUMN(HfBeauty, hasHfBeauty, bool); //! beauty hadron
+DECLARE_SOA_COLUMN(HfFemto, hasHfFemto, bool);   //! charm-hadron - N pair
+
 } // namespace filtering
 
 DECLARE_SOA_TABLE(NucleiFilters, "AOD", "Nuclei Filters", //!
                   filtering::H2, filtering::H3, filtering::He3, filtering::He4);
 
-constexpr std::array<char[32], 2> AvailableFilters{"NucleiFilters", "DiffractionFilters"};
-constexpr std::array<char[16], 2> FilterDescriptions{"Nuclei Filters", "DiffFilters"};
+constexpr std::array<char[32], 3> AvailableFilters{"NucleiFilters", "DiffractionFilters", "HeavyFlavourFilters"};
+constexpr std::array<char[16], 3> FilterDescriptions{"Nuclei Filters", "DiffFilters", "HF Filters"};
 
 using NucleiFilter = NucleiFilters::iterator;
 
@@ -39,6 +44,12 @@ using NucleiFilter = NucleiFilters::iterator;
 DECLARE_SOA_TABLE(DiffractionFilters, "AOD", "DiffFilters", //! Diffraction filters
                   filtering::DG);
 using DiffractionFilter = DiffractionFilters::iterator;
+
+// heavy flavours
+DECLARE_SOA_TABLE(HfFilters, "AOD", "HF Filters", //!
+                  filtering::HfHighPt, filtering::HfBeauty, filtering::HfFemto);
+
+using HfFilter = HfFilters::iterator;
 
 } // namespace o2::aod
 
