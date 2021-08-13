@@ -29,7 +29,10 @@ enum Code {
   kDPlus = 411,
   kLambdaCPlus = 4122,
   kXiCPlus = 4232,
-  kJpsi = 443
+  kJpsi = 443,
+  kB0 = 521,
+  kBs = 531,
+  kLambdaB0 = 5122
 };
 } // namespace pdg
 
