@@ -1,0 +1,77 @@
+// Copyright 2019-2020 CERN and copyright holders of ALICE O2.
+// See https://alice-o2.web.cern.ch/copyright for details of the copyright holders.
+// All rights not expressly granted are reserved.
+//
+// This software is distributed under the terms of the GNU General Public
+// License v3 (GPL Version 3), copied verbatim in the file "COPYING".
+//
+// In applying this license CERN does not waive the privileges and immunities
+// granted to it by virtue of its status as an Intergovernmental Organization
+// or submit itself to any jurisdiction.
+
+/// \file DescriptorInnerBarrelITS2.h
+/// \brief Definition of the DescriptorInnerBarrelITS2 class
+
+#ifndef ALICEO2_ITS3_DESCRIPTORINNERBARRELITS2_H
+#define ALICEO2_ITS3_DESCRIPTORINNERBARRELITS2_H
+
+#include <string>
+#include <vector>
+#include <TObject.h>
+#include <TGeoVolume.h>
+
+#include "ITSBase/DescriptorInnerBarrel.h"
+#include "ITSSimulation/V3Layer.h"
+
+namespace o2
+{
+namespace its
+{
+class DescriptorInnerBarrelITS2 : public o2::its::DescriptorInnerBarrel
+{
+ public:
+  // default constructor
+  DescriptorInnerBarrelITS2() {}
+  // standard constructor
+  DescriptorInnerBarrelITS2(int nlayers);
+
+  /// Default destructor
+  ~DescriptorInnerBarrelITS2() {}
+
+  DescriptorInnerBarrelITS2(const DescriptorInnerBarrelITS2& src) = delete;
+  DescriptorInnerBarrelITS2& operator=(const DescriptorInnerBarrelITS2& geom) = delete;
+
+  void Configure();
+  void GetConfigurationLayers(std::vector<bool>& turbo,
+                              std::vector<double>& phi0,
+                              std::vector<double>& radii,
+                              std::vector<double>& chipThickness,
+                              std::vector<int>& unitPerStave,
+                              std::vector<double>& staveWidth,
+                              std::vector<int>& stavePerLayer,
+                              std::vector<double>& staveTilt,
+                              std::vector<double>& detThickness,
+                              std::vector<int>& chipID,
+                              std::vector<int>& buildlev);
+
+  V3Layer* DefineLayer(int idLayer, TGeoVolume* dest);
+
+ private:
+  // layer properties
+  std::vector<bool> fTurboLayer{};                               //! True for "turbo" layers
+  std::vector<double> fLayerPhi0{};                              //! Vector of layer's 1st stave phi in lab
+  std::vector<int> fStavePerLayer{};                             //! Vector of number of staves per layer
+  std::vector<int> fUnitPerStave{};                              //! Vector of number of "units" per stave
+  std::vector<double> fChipThickness{};                          //! Vector of chip thicknesses
+  std::vector<double> fStaveWidth{};                             //! Vector of stave width (only used for turbo)
+  std::vector<double> fStaveTilt{};                              //! Vector of stave tilt (only used for turbo)
+  std::vector<o2::its::V3Layer::Model> fStaveModelInnerBarrel{}; //! Stave model
+
+  /// \cond CLASSIMP
+  ClassDef(DescriptorInnerBarrelITS2, 1); /// ITS inner barrel geometry descriptor
+  /// \endcond
+};
+} // namespace its
+} // namespace o2
+
+#endif

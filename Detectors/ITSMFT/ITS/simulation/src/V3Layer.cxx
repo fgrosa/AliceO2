@@ -16,7 +16,6 @@
 
 #include "ITSSimulation/V3Layer.h"
 #include "ITSBase/GeometryTGeo.h"
-#include "ITSSimulation/Detector.h"
 #include "ITSMFTSimulation/AlpideChip.h"
 #include "ITSMFTBase/SegmentationAlpide.h"
 
@@ -268,7 +267,7 @@ V3Layer::V3Layer()
     mChipTypeID(0),
     mIsTurbo(0),
     mBuildLevel(0),
-    mStaveModel(Detector::kIBModelDummy),
+    mStaveModel(kIBModelDummy),
     mIBModuleZLength(0),
     mOBModuleZLength(0)
 {
@@ -292,7 +291,7 @@ V3Layer::V3Layer(Int_t lay, Bool_t turbo, Int_t debug)
     mChipTypeID(0),
     mIsTurbo(turbo),
     mBuildLevel(0),
-    mStaveModel(Detector::kIBModelDummy),
+    mStaveModel(kIBModelDummy),
     mIBModuleZLength(0),
     mOBModuleZLength(0)
 {
@@ -490,14 +489,14 @@ TGeoVolume* V3Layer::createStave(const TGeoManager* /*mgr*/)
     mechStaveVol = createStaveStructInnerB();
     if (mechStaveVol) {
       ypos = ymod - ypos;
-      if (mStaveModel != Detector::kIBModel4) {
+      if (mStaveModel != kIBModel4) {
         ypos += (static_cast<TGeoBBox*>(mechStaveVol->GetShape()))->GetDY();
       }
       staveVol->AddNode(mechStaveVol, 1, new TGeoCombiTrans(0, -ypos, 0, new TGeoRotation("", 0, 0, 180)));
     }
   } else {
     TGeoVolume* hstaveVol = createStaveOuterB();
-    if (mStaveModel == Detector::kOBModel0) { // Create simplified stave struct as in v0
+    if (mStaveModel == kOBModel0) { // Create simplified stave struct as in v0
       staveVol->AddNode(hstaveVol, 0);
       mHierarchy[kHalfStave] = 1;
     } else { // (if mStaveModel) Create new stave struct as in TDR
@@ -571,7 +570,7 @@ Double_t V3Layer::createStaveInnerB(TGeoVolume* mother, const TGeoManager* mgr)
   ytot = ymod;
 
   // Place the FPC and glue
-  if (mStaveModel == Detector::kIBModel4) {
+  if (mStaveModel == kIBModel4) {
     Double_t yvol = (static_cast<TGeoBBox*>(ibModule->GetShape()))->GetDY();
     xpos = 0.5 * (xtot - xchip);
     ypos += (ymod + yvol);
@@ -902,17 +901,17 @@ TGeoVolume* V3Layer::createStaveStructInnerB(const TGeoManager* mgr)
   TGeoVolume* mechStavVol = nullptr;
 
   switch (mStaveModel) {
-    case Detector::kIBModelDummy:
+    case kIBModelDummy:
       mechStavVol = createStaveModelInnerBDummy(mgr);
       break;
-    case Detector::kIBModel0:
-    case Detector::kIBModel1:
-    case Detector::kIBModel21:
-    case Detector::kIBModel22:
-    case Detector::kIBModel3:
+    case kIBModel0:
+    case kIBModel1:
+    case kIBModel21:
+    case kIBModel22:
+    case kIBModel3:
       LOG(fatal) << "Stave model " << mStaveModel << " obsolete and no longer supported";
       break;
-    case Detector::kIBModel4:
+    case kIBModel4:
       mechStavVol = createStaveModelInnerB4(mgr);
       break;
     default:
@@ -1783,14 +1782,14 @@ TGeoVolume* V3Layer::createStaveOuterB(const TGeoManager* mgr)
   TGeoVolume* mechStavVol = nullptr;
 
   switch (mStaveModel) {
-    case Detector::kOBModelDummy:
+    case kOBModelDummy:
       mechStavVol = createStaveModelOuterBDummy(mgr);
       break;
-    case Detector::kOBModel0:
-    case Detector::kOBModel1:
+    case kOBModel0:
+    case kOBModel1:
       LOG(fatal) << "Stave model " << mStaveModel << " obsolete and no longer supported";
       break;
-    case Detector::kOBModel2:
+    case kOBModel2:
       mechStavVol = createStaveModelOuterB2(mgr);
       break;
     default:
@@ -2641,12 +2640,12 @@ TGeoVolume* V3Layer::createSpaceFrameOuterB(const TGeoManager* mgr)
   TGeoVolume* mechStavVol = nullptr;
 
   switch (mStaveModel) {
-    case Detector::kOBModelDummy:
-    case Detector::kOBModel0:
+    case kOBModelDummy:
+    case kOBModel0:
       mechStavVol = createSpaceFrameOuterBDummy(mgr);
       break;
-    case Detector::kOBModel1:
-    case Detector::kOBModel2:
+    case kOBModel1:
+    case kOBModel2:
       mechStavVol = createSpaceFrameOuterB2(mgr);
       break;
     default:

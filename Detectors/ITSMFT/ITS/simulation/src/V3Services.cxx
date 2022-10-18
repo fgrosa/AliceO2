@@ -17,7 +17,6 @@
 #include "ITSSimulation/V3Services.h"
 #include "ITSSimulation/V11Geometry.h"
 #include "ITSBase/GeometryTGeo.h"
-#include "ITSSimulation/Detector.h"
 #include "ITSMFTSimulation/AlpideChip.h"
 
 #include <fairlogger/Logger.h> // for LOG

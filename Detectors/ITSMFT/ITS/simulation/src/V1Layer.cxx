@@ -16,7 +16,6 @@
 
 #include "ITSSimulation/V1Layer.h"
 #include "ITSBase/GeometryTGeo.h"
-#include "ITSSimulation/Detector.h"
 
 #include <fairlogger/Logger.h> // for LOG
 
@@ -104,7 +103,7 @@ V1Layer::V1Layer()
     mChipTypeID(0),
     mIsTurbo(false),
     mBuildLevel(0),
-    mStaveModel(Detector::kIBModelDummy)
+    mStaveModel(kIBModelDummy)
 {
   for (int i = kNHLevels; i--;) {
     mHierarchy[i] = 0;
@@ -127,7 +126,7 @@ V1Layer::V1Layer(Int_t debug)
     mChipTypeID(0),
     mIsTurbo(false),
     mBuildLevel(0),
-    mStaveModel(Detector::kIBModelDummy)
+    mStaveModel(kIBModelDummy)
 {
   for (int i = kNHLevels; i--;) {
     mHierarchy[i] = 0;
@@ -150,7 +149,7 @@ V1Layer::V1Layer(Int_t lay, Int_t debug)
     mChipTypeID(0),
     mIsTurbo(false),
     mBuildLevel(0),
-    mStaveModel(Detector::kIBModelDummy)
+    mStaveModel(kIBModelDummy)
 {
   for (int i = kNHLevels; i--;) {
     mHierarchy[i] = 0;
@@ -173,7 +172,7 @@ V1Layer::V1Layer(Int_t lay, Bool_t turbo, Int_t debug)
     mChipTypeID(0),
     mIsTurbo(turbo),
     mBuildLevel(0),
-    mStaveModel(Detector::kIBModelDummy)
+    mStaveModel(kIBModelDummy)
 {
   for (int i = kNHLevels; i--;) {
     mHierarchy[i] = 0;
@@ -415,7 +414,7 @@ TGeoVolume* V1Layer::createStave(const TGeoManager* /*mgr*/)
     }
   } else {
     TGeoVolume* hstaveVol = createStaveOuterB();
-    if (mStaveModel == Detector::kOBModel0) { // Create simplified stave struct as in v0
+    if (mStaveModel == kOBModel0) { // Create simplified stave struct as in v0
       staveVol->AddNode(hstaveVol, 0);
       mHierarchy[kHalfStave] = 1;
     } else { // (if mStaveModel) Create new stave struct as in TDR
@@ -501,22 +500,22 @@ TGeoVolume* V1Layer::createStaveStructInnerB(const Double_t xsta, const Double_t
   TGeoVolume* mechStavVol = nullptr;
 
   switch (mStaveModel) {
-    case Detector::kIBModelDummy:
+    case kIBModelDummy:
       mechStavVol = createStaveModelInnerBDummy(xsta, zsta, mgr);
       break;
-    case Detector::kIBModel0:
+    case kIBModel0:
       mechStavVol = createStaveModelInnerB0(xsta, zsta, mgr);
       break;
-    case Detector::kIBModel1:
+    case kIBModel1:
       mechStavVol = createStaveModelInnerB1(xsta, zsta, mgr);
       break;
-    case Detector::kIBModel21:
+    case kIBModel21:
       mechStavVol = createStaveModelInnerB21(xsta, zsta, mgr);
       break;
-    case Detector::kIBModel22:
+    case kIBModel22:
       mechStavVol = createStaveModelInnerB22(xsta, zsta, mgr);
       break;
-    case Detector::kIBModel3:
+    case kIBModel3:
       mechStavVol = createStaveModelInnerB3(xsta, zsta, mgr);
       break;
     default:
@@ -1943,13 +1942,13 @@ TGeoVolume* V1Layer::createStaveOuterB(const TGeoManager* mgr)
   TGeoVolume* mechStavVol = nullptr;
 
   switch (mStaveModel) {
-    case Detector::kOBModelDummy:
+    case kOBModelDummy:
       mechStavVol = createStaveModelOuterBDummy(mgr);
       break;
-    case Detector::kOBModel0:
+    case kOBModel0:
       mechStavVol = createStaveModelOuterB0(mgr);
       break;
-    case Detector::kOBModel1:
+    case kOBModel1:
       mechStavVol = createStaveModelOuterB1(mgr);
       break;
     default:
@@ -2295,11 +2294,11 @@ TGeoVolume* V1Layer::createSpaceFrameOuterB(const TGeoManager* mgr)
   TGeoVolume* mechStavVol = nullptr;
 
   switch (mStaveModel) {
-    case Detector::kOBModelDummy:
-    case Detector::kOBModel0:
+    case kOBModelDummy:
+    case kOBModel0:
       mechStavVol = createSpaceFrameOuterBDummy(mgr);
       break;
-    case Detector::kOBModel1:
+    case kOBModel1:
       mechStavVol = createSpaceFrameOuterB1(mgr);
       break;
     default:

@@ -16,7 +16,6 @@
 #include "ITSSimulation/V3Cage.h"
 #include "ITSSimulation/V11Geometry.h"
 #include "ITSBase/GeometryTGeo.h"
-#include "ITSSimulation/Detector.h"
 
 #include <fairlogger/Logger.h> // for LOG
 
