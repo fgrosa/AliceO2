@@ -272,10 +272,6 @@ class Detector : public o2::base::DetImpl<Detector>
   /// Define the sensitive volumes of the geometry
   void defineSensitiveVolumes();
 
-  /// Creates the Inner Barrel Services
-  /// \param motherVolume the TGeoVolume owing the volume structure
-  void createInnerBarrelServices(TGeoVolume* motherVolume);
-
   /// Creates the Middle Barrel Services
   /// \param motherVolume the TGeoVolume owing the volume structure
   void createMiddlBarrelServices(TGeoVolume* motherVolume);

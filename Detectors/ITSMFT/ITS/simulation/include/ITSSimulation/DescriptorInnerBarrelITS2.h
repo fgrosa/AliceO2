@@ -54,7 +54,8 @@ class DescriptorInnerBarrelITS2 : public o2::its::DescriptorInnerBarrel
                               std::vector<int>& chipID,
                               std::vector<int>& buildlev);
 
-  V3Layer* DefineLayer(int idLayer, TGeoVolume* dest);
+  V3Layer* CreateLayer(int idLayer, TGeoVolume* dest);
+  void CreateServices(TGeoVolume* dest);
 
  private:
   // layer properties

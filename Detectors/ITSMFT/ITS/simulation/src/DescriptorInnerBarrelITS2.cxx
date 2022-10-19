@@ -27,6 +27,7 @@
 
 #include "ITSMFTBase/SegmentationAlpide.h"
 #include "ITSSimulation/DescriptorInnerBarrelITS2.h"
+#include "ITSSimulation/V3Services.h"
 
 using namespace o2::its;
 
@@ -109,7 +110,7 @@ void DescriptorInnerBarrelITS2::GetConfigurationLayers(std::vector<bool>& turbo,
 }
 
 //________________________________________________________________
-V3Layer* DescriptorInnerBarrelITS2::DefineLayer(int idLayer, TGeoVolume* dest)
+V3Layer* DescriptorInnerBarrelITS2::CreateLayer(int idLayer, TGeoVolume* dest)
 {
   V3Layer* mGeometry = nullptr;
   if (idLayer >= fNumLayers) {
@@ -144,4 +145,38 @@ V3Layer* DescriptorInnerBarrelITS2::DefineLayer(int idLayer, TGeoVolume* dest)
   mGeometry->createLayer(dest);
 
   return mGeometry; // is this needed?
+}
+
+//________________________________________________________________
+void DescriptorInnerBarrelITS2::CreateServices(TGeoVolume* dest)
+{
+  //
+  // Creates the Inner Barrel Service structures
+  //
+  // Input:
+  //         motherVolume : the volume hosting the services
+  //
+  // Output:
+  //
+  // Return:
+  //
+  // Created:      15 May 2019  Mario Sitta
+  //               (partially based on P.Namwongsa implementation in AliRoot)
+  // Updated:      19 Jun 2019  Mario Sitta  IB Side A added
+  // Updated:      21 Oct 2019  Mario Sitta  CYSS added
+  //
+
+  std::unique_ptr<V3Services> mServicesGeometry(new V3Services());
+
+  // Create the End Wheels on Side A
+  TGeoVolume* endWheelsA = mServicesGeometry.get()->createIBEndWheelsSideA();
+  dest->AddNode(endWheelsA, 1, nullptr);
+
+  // Create the End Wheels on Side C
+  TGeoVolume* endWheelsC = mServicesGeometry.get()->createIBEndWheelsSideC();
+  dest->AddNode(endWheelsC, 1, nullptr);
+
+  // Create the CYSS Assembly (i.e. the supporting half cylinder and cone)
+  TGeoVolume* cyss = mServicesGeometry.get()->createCYSSAssembly();
+  dest->AddNode(cyss, 1, nullptr);
 }

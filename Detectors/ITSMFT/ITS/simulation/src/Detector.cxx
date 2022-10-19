@@ -828,7 +828,7 @@ void Detector::constructDetectorGeometry()
   for (Int_t j = 0; j < mNumberLayers; j++) {
 
     if (j < mNumberInnerLayers) {
-      mGeometry[j] = dynamic_cast<DescriptorInnerBarrelITS2*>(mDescriptorIB.get())->DefineLayer(j, wrapVols[0]); // define IB layers on first wrapper volume always
+      mGeometry[j] = dynamic_cast<DescriptorInnerBarrelITS2*>(mDescriptorIB.get())->CreateLayer(j, wrapVols[0]); // define IB layers on first wrapper volume always
     } else {
       TGeoVolume* dest = vITSV;
       mWrapperLayerId[j] = -1;
@@ -874,7 +874,7 @@ void Detector::constructDetectorGeometry()
   // Now create the services
   mServicesGeometry = new V3Services();
 
-  createInnerBarrelServices(wrapVols[0]);
+  dynamic_cast<DescriptorInnerBarrelITS2*>(mDescriptorIB.get())->CreateServices(wrapVols[0]);
   createMiddlBarrelServices(wrapVols[1]);
   createOuterBarrelServices(wrapVols[2]);
   createOuterBarrelSupports(vITSV);
@@ -886,40 +886,6 @@ void Detector::constructDetectorGeometry()
   cagePtr->createAndPlaceCage(vALIC); // vALIC = barrel
 
   delete[] wrapVols; // delete pointer only, not the volumes
-}
-
-void Detector::createInnerBarrelServices(TGeoVolume* motherVolume)
-{
-  //
-  // Creates the Inner Barrel Service structures
-  //
-  // Input:
-  //         motherVolume : the volume hosting the services
-  //
-  // Output:
-  //
-  // Return:
-  //
-  // Created:      15 May 2019  Mario Sitta
-  //               (partially based on P.Namwongsa implementation in AliRoot)
-  // Updated:      19 Jun 2019  Mario Sitta  IB Side A added
-  // Updated:      21 Oct 2019  Mario Sitta  CYSS added
-  //
-
-  // Create the End Wheels on Side A
-  TGeoVolume* endWheelsA = mServicesGeometry->createIBEndWheelsSideA();
-
-  motherVolume->AddNode(endWheelsA, 1, nullptr);
-
-  // Create the End Wheels on Side C
-  TGeoVolume* endWheelsC = mServicesGeometry->createIBEndWheelsSideC();
-
-  motherVolume->AddNode(endWheelsC, 1, nullptr);
-
-  // Create the CYSS Assembly (i.e. the supporting half cylinder and cone)
-  TGeoVolume* cyss = mServicesGeometry->createCYSSAssembly();
-
-  motherVolume->AddNode(cyss, 1, nullptr);
 }
 
 void Detector::createMiddlBarrelServices(TGeoVolume* motherVolume)
