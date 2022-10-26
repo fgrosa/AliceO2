@@ -26,6 +26,7 @@
 #include "TVirtualMCStack.h" // for TVirtualMCStack
 
 #include "ITSMFTBase/SegmentationAlpide.h"
+#include "ITSBase/GeometryTGeo.h"
 #include "ITSSimulation/DescriptorInnerBarrelITS2.h"
 #include "ITSSimulation/V3Services.h"
 
@@ -62,6 +63,7 @@ void DescriptorInnerBarrelITS2::Configure()
   fChipTypeID.resize(fNumLayers);
   fBuildLevel.resize(fNumLayers);
   fStaveModelInnerBarrel.resize(fNumLayers);
+  fLayer.resize(fNumLayers);
 
   // Radii are from last TDR (ALICE-TDR-017.pdf Tab. 1.1)
   std::vector<std::array<double, 6>> IBdat;
@@ -112,39 +114,38 @@ void DescriptorInnerBarrelITS2::GetConfigurationLayers(std::vector<bool>& turbo,
 //________________________________________________________________
 V3Layer* DescriptorInnerBarrelITS2::CreateLayer(int idLayer, TGeoVolume* dest)
 {
-  V3Layer* mGeometry = nullptr;
   if (idLayer >= fNumLayers) {
     LOG(fatal) << "Trying to define layer " << idLayer << " of inner barrel, but only " << fNumLayers << " layers expected!";
-    return mGeometry;
+    return nullptr;
   }
 
   if (fTurboLayer[idLayer]) {
-    mGeometry = new V3Layer(idLayer, true, false);
-    mGeometry->setStaveWidth(fStaveWidth[idLayer]);
-    mGeometry->setStaveTilt(fStaveTilt[idLayer]);
+    fLayer[idLayer] = new V3Layer(idLayer, true, false);
+    fLayer[idLayer]->setStaveWidth(fStaveWidth[idLayer]);
+    fLayer[idLayer]->setStaveTilt(fStaveTilt[idLayer]);
   } else {
-    mGeometry = new V3Layer(idLayer, false);
+    fLayer[idLayer] = new V3Layer(idLayer, false);
   }
 
-  mGeometry->setPhi0(fLayerPhi0[idLayer]);
-  mGeometry->setRadius(fLayerRadii[idLayer]);
-  mGeometry->setNumberOfStaves(fStavePerLayer[idLayer]);
-  mGeometry->setNumberOfUnits(fUnitPerStave[idLayer]);
-  mGeometry->setChipType(fChipTypeID[idLayer]);
-  mGeometry->setBuildLevel(fBuildLevel[idLayer]);
+  fLayer[idLayer]->setPhi0(fLayerPhi0[idLayer]);
+  fLayer[idLayer]->setRadius(fLayerRadii[idLayer]);
+  fLayer[idLayer]->setNumberOfStaves(fStavePerLayer[idLayer]);
+  fLayer[idLayer]->setNumberOfUnits(fUnitPerStave[idLayer]);
+  fLayer[idLayer]->setChipType(fChipTypeID[idLayer]);
+  fLayer[idLayer]->setBuildLevel(fBuildLevel[idLayer]);
 
-  mGeometry->setStaveModel(fStaveModelInnerBarrel[idLayer]);
+  fLayer[idLayer]->setStaveModel(fStaveModelInnerBarrel[idLayer]);
 
   if (fChipThickness[idLayer] != 0) {
-    mGeometry->setChipThick(fChipThickness[idLayer]);
+    fLayer[idLayer]->setChipThick(fChipThickness[idLayer]);
   }
   if (fDetectorThickness[idLayer] != 0) {
-    mGeometry->setSensorThick(fDetectorThickness[idLayer]);
+    fLayer[idLayer]->setSensorThick(fDetectorThickness[idLayer]);
   }
 
-  mGeometry->createLayer(dest);
+  fLayer[idLayer]->createLayer(dest);
 
-  return mGeometry; // is this needed?
+  return fLayer[idLayer]; // is this needed?
 }
 
 //________________________________________________________________
@@ -179,4 +180,153 @@ void DescriptorInnerBarrelITS2::CreateServices(TGeoVolume* dest)
   // Create the CYSS Assembly (i.e. the supporting half cylinder and cone)
   TGeoVolume* cyss = mServicesGeometry.get()->createCYSSAssembly();
   dest->AddNode(cyss, 1, nullptr);
+}
+
+//________________________________________________________________
+void DescriptorInnerBarrelITS2::AddAlignableVolumesLayer(int idLayer, int wrapperLayerId, TString& parentPath, int& lastUID)
+{
+  //
+  // Add alignable volumes for a Layer and its daughters
+  //
+  // Created:      06 Mar 2018  Mario Sitta First version (mainly ported from AliRoot)
+  // Updated:      06 Jul 2021  Mario Sitta Do not set Layer as alignable volume
+  //
+
+  TString wrpV = wrapperLayerId != -1 ? Form("%s%d_1", GeometryTGeo::getITSWrapVolPattern(), wrapperLayerId) : "";
+  TString path = Form("%s/%s/%s%d_1", parentPath.Data(), wrpV.Data(), GeometryTGeo::getITSLayerPattern(), idLayer);
+  TString sname = GeometryTGeo::composeSymNameLayer(idLayer);
+
+  int nHalfBarrel = fLayer[idLayer]->getNumberOfHalfBarrelsPerParent();
+  int start = nHalfBarrel > 0 ? 0 : -1;
+  for (int iHalfBarrel{start}; iHalfBarrel < nHalfBarrel; ++iHalfBarrel) {
+    AddAlignableVolumesHalfBarrel(idLayer, iHalfBarrel, path, lastUID);
+  }
+}
+
+void DescriptorInnerBarrelITS2::AddAlignableVolumesHalfBarrel(int idLayer, int iHalfBarrel, TString& parentPath, int& lastUID) const
+{
+  //
+  // Add alignable volumes for a Half barrel and its daughters
+  //
+  // Created:      28 Jun 2021  Mario Sitta First version (based on similar methods)
+  //
+
+  TString path = parentPath;
+  if (iHalfBarrel >= 0) {
+    path = Form("%s/%s%d_%d", parentPath.Data(), GeometryTGeo::getITSHalfBarrelPattern(), idLayer, iHalfBarrel);
+    TString sname = GeometryTGeo::composeSymNameHalfBarrel(idLayer, iHalfBarrel);
+
+    LOG(debug) << "Add " << sname << " <-> " << path;
+
+    if (!gGeoManager->SetAlignableEntry(sname.Data(), path.Data())) {
+      LOG(fatal) << "Unable to set alignable entry ! " << sname << " : " << path;
+    }
+  }
+
+  int nStaves = fLayer[idLayer]->getNumberOfStavesPerParent();
+  for (int iStave{0}; iStave < nStaves; ++iStave) {
+    AddAlignableVolumesStave(idLayer, iHalfBarrel, iStave, path, lastUID);
+  }
+}
+
+void DescriptorInnerBarrelITS2::AddAlignableVolumesStave(int idLayer, int iHalfBarrel, int iStave, TString& parentPath, int& lastUID) const
+{
+  //
+  // Add alignable volumes for a Stave and its daughters
+  //
+  // Created:      06 Mar 2018  Mario Sitta First version (mainly ported from AliRoot)
+  // Updated:      29 Jun 2021  Mario Sitta Hal Barrel index added
+  //
+
+  TString path = Form("%s/%s%d_%d", parentPath.Data(), GeometryTGeo::getITSStavePattern(), idLayer, iStave);
+  TString sname = GeometryTGeo::composeSymNameStave(idLayer, iHalfBarrel, iStave);
+
+  LOG(debug) << "Add " << sname << " <-> " << path;
+
+  if (!gGeoManager->SetAlignableEntry(sname.Data(), path.Data())) {
+    LOG(fatal) << "Unable to set alignable entry ! " << sname << " : " << path;
+  }
+
+  int nHalfStave = fLayer[idLayer]->getNumberOfHalfStavesPerParent();
+  int start = nHalfStave > 0 ? 0 : -1;
+  for (int iHalfStave{start}; iHalfStave < nHalfStave; ++iHalfStave) {
+    AddAlignableVolumesHalfStave(idLayer, iHalfBarrel, iStave, iHalfStave, path, lastUID);
+  }
+}
+
+void DescriptorInnerBarrelITS2::AddAlignableVolumesHalfStave(int idLayer, int iHalfBarrel, int iStave, int iHalfStave, TString& parentPath, int& lastUID) const
+{
+  //
+  // Add alignable volumes for a HalfStave (if any) and its daughters
+  //
+  // Created:      06 Mar 2018  Mario Sitta First version (mainly ported from AliRoot)
+  // Updated:      29 Jun 2021  Mario Sitta Hal Barrel index added
+  //
+
+  TString path = parentPath;
+  if (iHalfStave >= 0) {
+    path = Form("%s/%s%d_%d", parentPath.Data(), GeometryTGeo::getITSHalfStavePattern(), idLayer, iHalfStave);
+    TString sname = GeometryTGeo::composeSymNameHalfStave(idLayer, iHalfBarrel, iStave, iHalfStave);
+
+    LOG(debug) << "Add " << sname << " <-> " << path;
+
+    if (!gGeoManager->SetAlignableEntry(sname.Data(), path.Data())) {
+      LOG(fatal) << "Unable to set alignable entry ! " << sname << " : " << path;
+    }
+  }
+
+  int nModules = fLayer[idLayer]->getNumberOfModulesPerParent();
+  int start = nModules > 0 ? 0 : -1;
+  for (int iModule{start}; iModule < nModules; iModule++) {
+    AddAlignableVolumesModule(idLayer, iHalfBarrel, iStave, iHalfStave, iModule, path, lastUID);
+  }
+}
+
+void DescriptorInnerBarrelITS2::AddAlignableVolumesModule(int idLayer, int iHalfBarrel, int iStave, int iHalfStave, int iModule, TString& parentPath, int& lastUID) const
+{
+  //
+  // Add alignable volumes for a Module (if any) and its daughters
+  //
+  // Created:      06 Mar 2018  Mario Sitta First version (mainly ported from AliRoot)
+  // Updated:      29 Jun 2021  Mario Sitta Hal Barrel index added
+  //
+
+  TString path = parentPath;
+  if (iModule >= 0) {
+    path = Form("%s/%s%d_%d", parentPath.Data(), GeometryTGeo::getITSModulePattern(), idLayer, iModule);
+    TString sname = GeometryTGeo::composeSymNameModule(idLayer, iHalfBarrel, iStave, iHalfStave, iModule);
+
+    LOG(debug) << "Add " << sname << " <-> " << path;
+
+    if (!gGeoManager->SetAlignableEntry(sname.Data(), path.Data())) {
+      LOG(fatal) << "Unable to set alignable entry ! " << sname << " : " << path;
+    }
+  }
+
+  int nChips = fLayer[idLayer]->getNumberOfChipsPerParent();
+  for (int iChip{0}; iChip < nChips; ++iChip) {
+    AddAlignableVolumesChip(idLayer, iHalfBarrel, iStave, iHalfStave, iModule, iChip, path, lastUID);
+  }
+}
+
+void DescriptorInnerBarrelITS2::AddAlignableVolumesChip(int idLayer, int iHalfBarrel, int iStave, int iHalfStave, int iModule, int iChip, TString& parentPath, int& lastUID) const
+{
+  //
+  // Add alignable volumes for a Chip
+  //
+  // Created:      06 Mar 2018  Mario Sitta First version (mainly ported from AliRoot)
+  // Updated:      29 Jun 2021  Mario Sitta Hal Barrel index added
+  //
+
+  TString path = Form("%s/%s%d_%d", parentPath.Data(), GeometryTGeo::getITSChipPattern(), idLayer, iChip);
+  TString sname = GeometryTGeo::composeSymNameChip(idLayer, iHalfBarrel, iStave, iHalfStave, iModule, iChip);
+  int modUID = o2::base::GeometryManager::getSensID(o2::detectors::DetID::ITS, lastUID++);
+
+  LOG(debug) << "Add " << sname << " <-> " << path;
+
+  if (!gGeoManager->SetAlignableEntry(sname, path.Data(), modUID)) {
+    LOG(fatal) << "Unable to set alignable entry ! " << sname << " : " << path;
+  }
+
+  return;
 }

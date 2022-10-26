@@ -985,7 +985,11 @@ void Detector::addAlignableVolumes() const
 
   Int_t lastUID = 0;
   for (Int_t lr = 0; lr < mNumberLayers; lr++) {
-    addAlignableVolumesLayer(lr, path, lastUID);
+    if (lr < mNumberInnerLayers) {
+      dynamic_cast<DescriptorInnerBarrelITS2*>(mDescriptorIB.get())->AddAlignableVolumesLayer(lr, mWrapperLayerId[lr], path, lastUID);}
+    else {
+      addAlignableVolumesLayer(lr, path, lastUID);
+    }
   }
 
   return;
