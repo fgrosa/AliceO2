@@ -60,7 +60,6 @@ class DescriptorInnerBarrelITS2 : public o2::its::DescriptorInnerBarrel
   void AddAlignableVolumesLayer(int idLayer, int wrapperLayerId, TString& parentPath, int& lastUID);
 
  private:
-
   void AddAlignableVolumesHalfBarrel(int idLayer, int iHalfBarrel, TString& parentPath, int& lastUID) const;
   void AddAlignableVolumesStave(int idLayer, int iHalfBarrel, int iStave, TString& parentPath, int& lastUID) const;
   void AddAlignableVolumesHalfStave(int idLayer, int iHalfBarrel, int iStave, int iHalfStave, TString& parentPath, int& lastUID) const;
